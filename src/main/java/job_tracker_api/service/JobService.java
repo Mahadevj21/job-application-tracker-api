@@ -31,4 +31,28 @@ public class JobService {
                 .orElseThrow(() -> new JobNotFoundException(id));
     }
 
+    // ── Update ────────────────────────────────────────────────────────────────
+
+    public JobApplication updateJob(Long id, JobApplication updatedJob) {
+        JobApplication existing = jobApplicationRepository.findById(id)
+                .orElseThrow(() -> new JobNotFoundException(id));
+
+        existing.setCompanyName(updatedJob.getCompanyName());
+        existing.setJobTitle(updatedJob.getJobTitle());
+        existing.setStatus(updatedJob.getStatus());
+        existing.setAppliedDate(updatedJob.getAppliedDate());
+        existing.setNotes(updatedJob.getNotes());
+
+        return jobApplicationRepository.save(existing);
+    }
+
+    // ── Delete ────────────────────────────────────────────────────────────────
+
+    public void deleteJob(Long id) {
+        if (!jobApplicationRepository.existsById(id)) {
+            throw new JobNotFoundException(id);
+        }
+        jobApplicationRepository.deleteById(id);
+    }
+
 }
