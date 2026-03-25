@@ -14,4 +14,21 @@ public class JobService {
 
     private final JobApplicationRepository jobApplicationRepository;
 
+    // ── Create ────────────────────────────────────────────────────────────────
+
+    public JobApplication createJob(JobApplication jobApplication) {
+        return jobApplicationRepository.save(jobApplication);
+    }
+
+    // ── Read ──────────────────────────────────────────────────────────────────
+
+    public List<JobApplication> getAllJobs() {
+        return jobApplicationRepository.findAll();
+    }
+
+    public JobApplication getJobById(Long id) {
+        return jobApplicationRepository.findById(id)
+                .orElseThrow(() -> new JobNotFoundException(id));
+    }
+
 }
