@@ -16,15 +16,17 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "job_applications")
 public class JobApplication {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @jakarta.validation.constraints.NotBlank(message = "Company Name is required")
     private String companyName;
 
+    @jakarta.validation.constraints.NotBlank(message = "Job Title is required")
     private String jobTitle;
 
+    @jakarta.validation.constraints.NotNull(message = "Job Status is required")
     @Enumerated(EnumType.STRING)
     private JobStatus status;
 
