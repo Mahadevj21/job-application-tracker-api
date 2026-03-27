@@ -1,13 +1,16 @@
 package job_tracker_api.controller;
 
-import job_tracker_api.model.JobApplication;
+import job_tracker_api.dto.JobApplicationDto;
 import job_tracker_api.service.JobService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -17,24 +20,24 @@ public class JobController {
     private final JobService jobService;
 
     @PostMapping
-    public ResponseEntity<JobApplication> createJob(@RequestBody JobApplication jobApplication) {
-        JobApplication createdJob = jobService.createJob(jobApplication);
-        return new ResponseEntity<>(createdJob, HttpStatus.CREATED);
+    public ResponseEntity<JobApplicationDto> createJob(@Valid @RequestBody JobApplicationDto dto) {
+        return new ResponseEntity<>(jobService.createJob(dto), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<JobApplication>> getAllJobs() {
-        return ResponseEntity.ok(jobService.getAllJobs());
+    public ResponseEntity<Page<JobApplicationDto>> getAllJobs(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(jobService.getAllJobs(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JobApplication> getJobById(@PathVariable Long id) {
+    public ResponseEntity<JobApplicationDto> getJobById(@PathVariable Long id) {
         return ResponseEntity.ok(jobService.getJobById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<JobApplication> updateJob(@PathVariable Long id, @RequestBody JobApplication jobApplication) {
-        return ResponseEntity.ok(jobService.updateJob(id, jobApplication));
+    public ResponseEntity<JobApplicationDto> updateJob(@PathVariable Long id, @Valid @RequestBody JobApplicationDto dto) {
+        return ResponseEntity.ok(jobService.updateJob(id, dto));
     }
 
     @DeleteMapping("/{id}")

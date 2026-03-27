@@ -1,12 +1,13 @@
 package job_tracker_api.service;
 
+import job_tracker_api.dto.JobApplicationDto;
 import job_tracker_api.exception.JobNotFoundException;
 import job_tracker_api.model.JobApplication;
 import job_tracker_api.repository.JobApplicationRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -14,39 +15,35 @@ public class JobService {
 
     private final JobApplicationRepository jobApplicationRepository;
 
-    // ── Create ────────────────────────────────────────────────────────────────
-
-    public JobApplication createJob(JobApplication jobApplication) {
-        return jobApplicationRepository.save(jobApplication);
+    public JobApplicationDto createJob(JobApplicationDto dto) {
+        JobApplication job = toEntity(dto);
+        JobApplication saved = jobApplicationRepository.save(job);
+        return toDto(saved);
     }
 
-    // ── Read ──────────────────────────────────────────────────────────────────
-
-    public List<JobApplication> getAllJobs() {
-        return jobApplicationRepository.findAll();
+    public Page<JobApplicationDto> getAllJobs(Pageable pageable) {
+        return jobApplicationRepository.findAll(pageable).map(this::toDto);
     }
 
-    public JobApplication getJobById(Long id) {
+    public JobApplicationDto getJobById(Long id) {
         return jobApplicationRepository.findById(id)
+                .map(this::toDto)
                 .orElseThrow(() -> new JobNotFoundException(id));
     }
 
-    // ── Update ────────────────────────────────────────────────────────────────
-
-    public JobApplication updateJob(Long id, JobApplication updatedJob) {
+    public JobApplicationDto updateJob(Long id, JobApplicationDto dto) {
         JobApplication existing = jobApplicationRepository.findById(id)
                 .orElseThrow(() -> new JobNotFoundException(id));
 
-        existing.setCompanyName(updatedJob.getCompanyName());
-        existing.setJobTitle(updatedJob.getJobTitle());
-        existing.setStatus(updatedJob.getStatus());
-        existing.setAppliedDate(updatedJob.getAppliedDate());
-        existing.setNotes(updatedJob.getNotes());
+        existing.setCompanyName(dto.getCompanyName());
+        existing.setJobTitle(dto.getJobTitle());
+        existing.setStatus(dto.getStatus());
+        existing.setAppliedDate(dto.getAppliedDate());
+        existing.setNotes(dto.getNotes());
 
-        return jobApplicationRepository.save(existing);
+        JobApplication updated = jobApplicationRepository.save(existing);
+        return toDto(updated);
     }
-
-    // ── Delete ────────────────────────────────────────────────────────────────
 
     public void deleteJob(Long id) {
         if (!jobApplicationRepository.existsById(id)) {
@@ -55,4 +52,28 @@ public class JobService {
         jobApplicationRepository.deleteById(id);
     }
 
+    private JobApplicationDto toDto(JobApplication entity) {
+        if (entity == null) return null;
+        return JobApplicationDto.builder()
+                .id(entity.getId())
+                .companyName(entity.getCompanyName())
+                .jobTitle(entity.getJobTitle())
+                .status(entity.getStatus())
+                .appliedDate(entity.getAppliedDate())
+                .notes(entity.getNotes())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
+
+    private JobApplication toEntity(JobApplicationDto dto) {
+        if (dto == null) return null;
+        return JobApplication.builder()
+                .companyName(dto.getCompanyName())
+                .jobTitle(dto.getJobTitle())
+                .status(dto.getStatus())
+                .appliedDate(dto.getAppliedDate())
+                .notes(dto.getNotes())
+                .build();
+    }
 }
