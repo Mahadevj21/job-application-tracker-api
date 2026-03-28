@@ -1,7 +1,7 @@
 package job_tracker_api.controller;
 
 import job_tracker_api.dto.JobApplicationDto;
-import job_tracker_api.service.JobService;
+import job_tracker_api.service.JobApplicationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,32 +17,32 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class JobController {
 
-    private final JobService jobService;
+    private final JobApplicationService jobApplicationService;
 
     @PostMapping
     public ResponseEntity<JobApplicationDto> createJob(@Valid @RequestBody JobApplicationDto dto) {
-        return new ResponseEntity<>(jobService.createJob(dto), HttpStatus.CREATED);
+        return new ResponseEntity<>(jobApplicationService.createJob(dto), HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<Page<JobApplicationDto>> getAllJobs(
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(jobService.getAllJobs(pageable));
+        return ResponseEntity.ok(jobApplicationService.getAllJobs(pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<JobApplicationDto> getJobById(@PathVariable Long id) {
-        return ResponseEntity.ok(jobService.getJobById(id));
+        return ResponseEntity.ok(jobApplicationService.getJobById(id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<JobApplicationDto> updateJob(@PathVariable Long id, @Valid @RequestBody JobApplicationDto dto) {
-        return ResponseEntity.ok(jobService.updateJob(id, dto));
+        return ResponseEntity.ok(jobApplicationService.updateJob(id, dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteJob(@PathVariable Long id) {
-        jobService.deleteJob(id);
+        jobApplicationService.deleteJob(id);
         return ResponseEntity.noContent().build();
     }
 }

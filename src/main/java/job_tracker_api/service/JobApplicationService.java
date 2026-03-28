@@ -3,7 +3,9 @@ package job_tracker_api.service;
 import job_tracker_api.dto.JobApplicationDto;
 import job_tracker_api.exception.JobNotFoundException;
 import job_tracker_api.model.JobApplication;
+import job_tracker_api.model.User;
 import job_tracker_api.repository.JobApplicationRepository;
+import job_tracker_api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,12 +13,25 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class JobService {
+public class JobApplicationService {
 
     private final JobApplicationRepository jobApplicationRepository;
+    private final UserRepository userRepository;
 
     public JobApplicationDto createJob(JobApplicationDto dto) {
+        if (dto.getJobTitle() == null || dto.getJobTitle().trim().isEmpty()) {
+            throw new RuntimeException("Job title cannot be empty");
+        }
+        if (dto.getUserId() == null) {
+            throw new RuntimeException("User ID must be provided");
+        }
+        
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Invalid user id: " + dto.getUserId()));
+
         JobApplication job = toEntity(dto);
+        job.setUser(user);
+
         JobApplication saved = jobApplicationRepository.save(job);
         return toDto(saved);
     }
@@ -32,14 +47,25 @@ public class JobService {
     }
 
     public JobApplicationDto updateJob(Long id, JobApplicationDto dto) {
+        if (dto.getJobTitle() == null || dto.getJobTitle().trim().isEmpty()) {
+            throw new RuntimeException("Job title cannot be empty");
+        }
+        if (dto.getUserId() == null) {
+            throw new RuntimeException("User ID must be provided");
+        }
+
         JobApplication existing = jobApplicationRepository.findById(id)
                 .orElseThrow(() -> new JobNotFoundException(id));
+
+        User user = userRepository.findById(dto.getUserId())
+                .orElseThrow(() -> new RuntimeException("Invalid user id: " + dto.getUserId()));
 
         existing.setCompanyName(dto.getCompanyName());
         existing.setJobTitle(dto.getJobTitle());
         existing.setStatus(dto.getStatus());
         existing.setAppliedDate(dto.getAppliedDate());
         existing.setNotes(dto.getNotes());
+        existing.setUser(user);
 
         JobApplication updated = jobApplicationRepository.save(existing);
         return toDto(updated);
@@ -56,6 +82,7 @@ public class JobService {
         if (entity == null) return null;
         return JobApplicationDto.builder()
                 .id(entity.getId())
+                .userId(entity.getUser() != null ? entity.getUser().getId() : null)
                 .companyName(entity.getCompanyName())
                 .jobTitle(entity.getJobTitle())
                 .status(entity.getStatus())

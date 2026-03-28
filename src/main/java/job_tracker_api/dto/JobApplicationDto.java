@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 public class JobApplicationDto {
     private Long id;
 
+    @NotNull(message = "User ID is required")
+    private Long userId;
+
     @NotBlank(message = "Company Name is required")
     private String companyName;
 
