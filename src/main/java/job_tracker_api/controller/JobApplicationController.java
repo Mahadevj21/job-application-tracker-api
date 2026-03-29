@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
-public class JobController {
+public class JobApplicationController {
 
     private final JobApplicationService jobApplicationService;
 
